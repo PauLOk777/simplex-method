@@ -1,5 +1,6 @@
 package com.paulok777;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,11 +23,11 @@ public class SimplexTable {
 
         Integer[] numbers = new Integer[numberOfLimitations];
         int index = 0;
-        for (int i = numberOfLimitations; i < numberOfLimitations + numberOfVariables; i++) {
+        for (int i = numberOfVariables; i < numberOfLimitations + numberOfVariables; i++) {
             numbers[index++] = i;
         }
 
-        indexesOfBasisVariables = Arrays.asList(numbers);
+        indexesOfBasisVariables = new ArrayList<Integer>(Arrays.asList(numbers));
     }
 
     public SimplexTable(double[][] matrix, int numberOfVariables, int numberOfLimitations,
@@ -37,8 +38,28 @@ public class SimplexTable {
         this.indexesOfBasisVariables = indexesOfBasisVariables;
     }
 
-    public void printCurrentTableSolution() {
+    public void changeVariablesInBasis(int indexOfVariableToPutInBasis, int indexOfRowOfVariableToRemoveFromBasis) {
+        indexesOfBasisVariables.set(indexOfRowOfVariableToRemoveFromBasis, indexOfVariableToPutInBasis);
+    }
 
+    public void printCurrentTableSolution() {
+        System.out.println("Solution:");
+        System.out.println("Target function: " + TARGET_FUNCTION + " = " + matrix[0][numberOfVariables + numberOfLimitations]);
+
+        StringBuilder result = new StringBuilder();
+        for(int i = 0; i < numberOfVariables; i++) {
+            if (indexesOfBasisVariables.contains(i)) {
+                int rowOfVariable = indexesOfBasisVariables.indexOf(i) + 1;
+                result.append(VARIABLE_NAME)
+                        .append(i + 1)
+                        .append(" = ")
+                        .append(matrix[rowOfVariable][numberOfVariables + numberOfLimitations])
+                        .append(", ");
+            } else {
+                result.append(VARIABLE_NAME).append(i + 1).append(" = 0, ");
+            }
+        }
+        System.out.println(result.substring(0, result.length() - 2) + ".");
     }
 
     public void print() {
@@ -60,7 +81,11 @@ public class SimplexTable {
                         System.out.format(format, getRowVariable(i - 1));
                     }
                 } else {
-                    System.out.format(format, matrix[i][j - 1]);
+                    String numberString = String.valueOf(matrix[i][j - 1]);
+                    if (numberString.contains(".") && numberString.indexOf(".") + 4 <= numberString.length()) {
+                        numberString = numberString.substring(0, numberString.indexOf(".") + 4);
+                    }
+                    System.out.format(format, numberString);
                 }
             }
             System.out.println();
@@ -97,7 +122,15 @@ public class SimplexTable {
         System.out.println();
     }
 
-    private String getRowVariable(int index) {
+    public String getColumnVariable(int index) {
+        if (index < numberOfVariables) {
+            return VARIABLE_NAME + ++index;
+        } else {
+            return SYNTHETIC_VARIABLE_NAME + (index - numberOfVariables + 1);
+        }
+    }
+
+    public String getRowVariable(int index) {
         int variableIndexInRow = indexesOfBasisVariables.get(index);
 
         if (variableIndexInRow < numberOfVariables) {
@@ -111,7 +144,11 @@ public class SimplexTable {
         int maxSize = 0;
         for (double[] row : matrix) {
             for (double elem : row) {
-                int numberLength = String.valueOf(elem).length();
+                String numberString = String.valueOf(elem);
+                if (numberString.contains(".") && numberString.indexOf(".") + 4 <= numberString.length()) {
+                    numberString = numberString.substring(0, numberString.indexOf(".") + 4);
+                }
+                int numberLength = numberString.length();
                 if (maxSize < numberLength) {
                     maxSize = numberLength;
                 }
@@ -136,7 +173,4 @@ public class SimplexTable {
         return numberOfLimitations;
     }
 
-    public List<Integer> getIndexesOfBasisVariables() {
-        return indexesOfBasisVariables;
-    }
 }
