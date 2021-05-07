@@ -3,9 +3,11 @@ package com.paulok777;
 public class SimplexSolver {
 
     private SimplexTable table;
+    private boolean maximization;
 
-    public SimplexSolver(SimplexTable table) {
+    public SimplexSolver(SimplexTable table, boolean maximization) {
         this.table = table;
+        this.maximization = maximization;
     }
 
     public SimplexTable solve() {
@@ -29,7 +31,8 @@ public class SimplexSolver {
 
     private boolean isTableOptimal() {
         for (int i = 0; i < table.getMatrix()[0].length - 1; i++) {
-            if (table.getMatrix()[0][i] < 0) {
+            if ((maximization && table.getMatrix()[0][i] < 0)
+                    ||(!maximization && table.getMatrix()[0][i] > 0)) {
                 return false;
             }
         }
@@ -37,17 +40,18 @@ public class SimplexSolver {
     }
 
     private int chooseColumnToPutInBasis() {
-        double minValue = 0;
+        double maxValue = 0;
         int index = 0;
 
         for (int i = 0; i < table.getMatrix()[0].length - 1; i++) {
-            if (table.getMatrix()[0][i] < 0 && table.getMatrix()[0][i] < minValue) {
-                minValue = table.getMatrix()[0][i];
+            if ((maximization && table.getMatrix()[0][i] < 0 && Math.abs(table.getMatrix()[0][i]) > maxValue)
+                    || (!maximization && table.getMatrix()[0][i] > 0 && table.getMatrix()[0][i] > maxValue)) {
+                maxValue = table.getMatrix()[0][i];
                 index = i;
             }
         }
 
-        System.out.println("The largest number by module is " + minValue + ". It's " + table.getColumnVariable(index));
+        System.out.println("The largest number by module is " + maxValue + ". It's " + table.getColumnVariable(index));
         return index;
     }
 

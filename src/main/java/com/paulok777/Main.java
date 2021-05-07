@@ -4,7 +4,7 @@ public class Main {
 
     public static void main(String[] args) {
         SimplexTable table = new SimplexTable(getData(), 2, 3);
-        SimplexSolver solver = new SimplexSolver(table);
+        SimplexSolver solver = new SimplexSolver(table, true);
         SimplexTable optimalTable = solver.solve();
         System.out.println("It's optimal solution.");
         optimalTable.print();
